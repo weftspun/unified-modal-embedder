@@ -1,0 +1,7 @@
+/_build/
+/deps/
+/.lake/
+/target/
+erl_crash.dump
+*.beam
+__pycache__/
