@@ -1,10 +1,10 @@
 # RFD 1 Few-shot mesh classification without unfreezing the TRELLIS.2 encoder
 
-| | |
-|---|---|
-| **State** | ideation |
-| **Authors** | K. S. Ernest (iFire) Lee |
-| **Repo** | unified-modal-embedder |
+|             |                                                                                                                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **State**   | ideation                                                                                                                                                                                          |
+| **Authors** | K. S. Ernest (iFire) Lee                                                                                                                                                                          |
+| **Repo**    | unified-modal-embedder                                                                                                                                                                            |
 | **Related** | `weftspun/multimodal-semantic-ids` (`mesh-only-scope-postpone-qwen3vl-embedder`, `multimodal-residual-fsq-semantic-ids`), `weftspun/trellis2-mesh-vae-slang`, `weftspun/residual-fsq-recommender` |
 
 ## Summary
@@ -55,8 +55,8 @@ reaching for SetFit in the first place.
 
 ## Research findings
 
-Ran a deep-research pass on: *given a frozen encoder, which downstream-head
-strategy gets the highest few-shot classification accuracy* — comparing
+Ran a deep-research pass on: _given a frozen encoder, which downstream-head
+strategy gets the highest few-shot classification accuracy_ — comparing
 plain linear probing, CLIP-Adapter, Tip-Adapter/Tip-Adapter-F,
 prototypical-network-style embedding adaptation (FEAT), and SetFit-style
 contrastive head training. 106 sub-agents, 23 primary sources fetched, 25
@@ -97,7 +97,7 @@ at far lower compute cost — worth keeping as a cheap fallback baseline.
 [LP++, CVPR 2024](https://openaccess.thecvf.com/content/CVPR2024/papers/Huang_LP_A_Surprisingly_Strong_Linear_Probe_for_Few-Shot_CLIP_CVPR_2024_paper.pdf).
 
 **Direct precedent for the 3D case:** Tip-Adapter-style caching has already
-been applied to *frozen* 3D point-cloud embeddings — PointCLIP and
+been applied to _frozen_ 3D point-cloud embeddings — PointCLIP and
 PointCLIP V2 use exactly this mechanism (multi-view rendering into a frozen
 CLIP-style encoder, then a cache/inter-view adapter) for few-shot 3D
 classification.
@@ -122,7 +122,7 @@ downstream of this repo's existing frozen fusion output — never touching
 TRELLIS.2 or the fused 768-d vector that `residual-fsq-recommender` depends
 on.
 
-1. **Data prep** (unchanged from the original plan) — run the *frozen*
+1. **Data prep** (unchanged from the original plan) — run the _frozen_
    TRELLIS.2 SLAT encoder + this repo's existing fusion/truncation path to
    get the standard 768-d embedding per asset.
 
@@ -141,19 +141,19 @@ on.
 
 4. **Inference** — a small wrapper class: raw asset → existing frozen
    fusion pipeline (unchanged, reused as-is) → cache/prototype lookup →
-   class probabilities. This wrapper is a *consumer* of
+   class probabilities. This wrapper is a _consumer_ of
    `unified-modal-embedder`'s output, structurally identical to how
    `residual-fsq-recommender` consumes it — it should not live inside this
    repo.
 
-| Component | Text SetFit (standard) | Original 3D proposal | This RFD (cache/prototype adapter) |
-|---|---|---|---|
-| Base representation | `sentence-transformers` | TRELLIS.2 VAE encoder | This repo's frozen 768-d fused embedding |
-| What gets fine-tuned | Full encoder | Encoder (or its projection) | Nothing (training-free) or a small cache (optional `-F` pass) |
-| Data format | Tokenized text | 3D tensors / voxel grids | Precomputed 768-d vectors (already produced today) |
-| Mechanism | Contrastive Siamese + `CosineSimilarityLoss` | `nn.CosineEmbeddingLoss` on pairs | Key-value cache / class-prototype retrieval |
-| Classifier | Integrated `LogisticRegression` | scikit-learn `LogisticRegression` | Similarity-weighted cache lookup (+ optional fine-tuned residual) |
-| Lives in | — | — | New downstream repo/tool, not `unified-modal-embedder` |
+| Component            | Text SetFit (standard)                       | Original 3D proposal              | This RFD (cache/prototype adapter)                                |
+| -------------------- | -------------------------------------------- | --------------------------------- | ----------------------------------------------------------------- |
+| Base representation  | `sentence-transformers`                      | TRELLIS.2 VAE encoder             | This repo's frozen 768-d fused embedding                          |
+| What gets fine-tuned | Full encoder                                 | Encoder (or its projection)       | Nothing (training-free) or a small cache (optional `-F` pass)     |
+| Data format          | Tokenized text                               | 3D tensors / voxel grids          | Precomputed 768-d vectors (already produced today)                |
+| Mechanism            | Contrastive Siamese + `CosineSimilarityLoss` | `nn.CosineEmbeddingLoss` on pairs | Key-value cache / class-prototype retrieval                       |
+| Classifier           | Integrated `LogisticRegression`              | scikit-learn `LogisticRegression` | Similarity-weighted cache lookup (+ optional fine-tuned residual) |
+| Lives in             | —                                            | —                                 | New downstream repo/tool, not `unified-modal-embedder`            |
 
 ## Alternatives considered
 
@@ -169,7 +169,7 @@ on.
   the cache/prototype approach on the closest available benchmark. Not
   ruled out entirely — worth a quick comparison once real labeled data
   exists — but no longer the default recommendation.
-- **Fine-tune only a projection *inside* the mesh slot, before fusion.**
+- **Fine-tune only a projection _inside_ the mesh slot, before fusion.**
   Rejected — it still mutates the per-modality vector that feeds the
   shared 768-d space, so every other consumer of that space is affected by
   a change made for one classification task.
@@ -202,5 +202,5 @@ on.
 - Once real labeled mesh data exists: run training-free cache, `-F`
   fine-tuned cache, plain linear probe, and the contrastive-MLP-head
   alternative side by side on the same held-out set before committing —
-  the literature comparison above is evidence for *where to start*, not a
+  the literature comparison above is evidence for _where to start_, not a
   substitute for measuring on TRELLIS.2 embeddings directly.
